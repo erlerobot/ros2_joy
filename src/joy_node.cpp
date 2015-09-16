@@ -34,18 +34,19 @@
 #include <math.h>
 #include <linux/joystick.h>
 #include <fcntl.h>
-#include <diagnostic_updater/diagnostic_updater.h>
+//#include <diagnostic_updater/diagnostic_updater.h>
 //#include "ros/ros.h"
 #include <rclcpp/rclcpp.hpp> 
 //#include <sensor_msgs/Joy.h>
- #include <sensor_msgs/msg/joy.h>
+#include <sensor_msgs/msg/joy.h>
 
 
 ///\brief Opens, reads from and publishes joystick events
 class Joystick
 {
 private:
-  ros::NodeHandle nh_;
+  //ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr nh_;
   bool open_;               
   std::string joy_dev_;
   double deadzone_;
@@ -53,7 +54,8 @@ private:
   double coalesce_interval_; // Defaults to 100 Hz rate limit.
   int event_count_;
   int pub_count_;
-  ros::Publisher pub_;
+  //ros::Publisher pub_;
+ /* rclcpp::Publisher pub_;
   double lastDiagTime_;
   
   diagnostic_updater::Updater diagnostic_;
@@ -82,7 +84,7 @@ private:
   }
   
 public:
-  Joystick() : nh_(), diagnostic_()
+  Joystick() : nh_() //, diagnostic_()
   {}
   
   ///\brief Opens joystick port, reads from port and publishes while node is active
@@ -97,39 +99,39 @@ public:
     nh_param.param<std::string>("dev", joy_dev_, "/dev/input/js0");
     nh_param.param<double>("deadzone", deadzone_, 0.05);
     nh_param.param<double>("autorepeat_rate", autorepeat_rate_, 0);
-    nh_param.param<double>("coalesce_interval", coalesce_interval_, 0.001);
+    nh_param.param<double>("coalesce_interval", coalesce_interval_, 0.001); 
     
     // Checks on parameters
     if (autorepeat_rate_ > 1 / coalesce_interval_)
-      ROS_WARN("joy_node: autorepeat_rate (%f Hz) > 1/coalesce_interval (%f Hz) does not make sense. Timing behavior is not well defined.", autorepeat_rate_, 1/coalesce_interval_);
-    
+      //ROS_WARN("joy_node: autorepeat_rate (%f Hz) > 1/coalesce_interval (%f Hz) does not make sense. Timing behavior is not well defined.", autorepeat_rate_, 1/coalesce_interval_);
+      std::cout << "joy_node: autorepeat_rate (%f Hz) > 1/coalesce_interval (%f Hz) does not make sense. Timing behavior is not well defined." << std::endl;
     if (deadzone_ >= 1)
     {
-      ROS_WARN("joy_node: deadzone greater than 1 was requested. The semantics of deadzone have changed. It is now related to the range [-1:1] instead of [-32767:32767]. For now I am dividing your deadzone by 32767, but this behavior is deprecated so you need to update your launch file.");
+      //ROS_WARN("joy_node: deadzone greater than 1 was requested. The semantics of deadzone have changed. It is now related to the range [-1:1] instead of [-32767:32767]. For now I am dividing your deadzone by 32767, but this behavior is deprecated so you need to update your launch file.");
       deadzone_ /= 32767;
     }
     
     if (deadzone_ > 0.9)
     {
-      ROS_WARN("joy_node: deadzone (%f) greater than 0.9, setting it to 0.9", deadzone_);
+      //ROS_WARN("joy_node: deadzone (%f) greater than 0.9, setting it to 0.9", deadzone_);
       deadzone_ = 0.9;
     }
     
     if (deadzone_ < 0)
     {
-      ROS_WARN("joy_node: deadzone_ (%f) less than 0, setting to 0.", deadzone_);
+      //ROS_WARN("joy_node: deadzone_ (%f) less than 0, setting to 0.", deadzone_);
       deadzone_ = 0;
     }
 
     if (autorepeat_rate_ < 0)
     {
-      ROS_WARN("joy_node: autorepeat_rate (%f) less than 0, setting to 0.", autorepeat_rate_);
+      //ROS_WARN("joy_node: autorepeat_rate (%f) less than 0, setting to 0.", autorepeat_rate_);
       autorepeat_rate_ = 0;
     }
     
     if (coalesce_interval_ < 0)
     {
-      ROS_WARN("joy_node: coalesce_interval (%f) less than 0, setting to 0.", coalesce_interval_);
+      //ROS_WARN("joy_node: coalesce_interval (%f) less than 0, setting to 0.", coalesce_interval_);
       coalesce_interval_ = 0;
     }
     
@@ -144,7 +146,7 @@ public:
     int joy_fd;
     event_count_ = 0;
     pub_count_ = 0;
-    lastDiagTime_ = ros::Time::now().toSec();
+    //lastDiagTime_ = ros::Time::now().toSec();
     
     // Big while loop opens, publishes
     while (nh_.ok())
@@ -322,12 +324,16 @@ public:
     ROS_INFO("joy_node shut down.");
     
     return 0;
-  }
+  } */
 };
 
 int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "joy_node");
-  Joystick j;
-  return j.main(argc, argv);
+{ 
+  //INITIALIZE
+  //ros::init(argc, argv, "joy_node");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("joy_node");
+  //Joystick j;
+  //return j.main(argc, argv);
+  return 0;
 }
